@@ -1,85 +1,64 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React, { useState, useEffect } from "react";
 import Header from "../components/Header";
 import CreateCourseModal from "../components/modals/create_course";
+import EditCourseModal from "../components/modals/edit_course";
+import { fetchCourses, createCourse, updateCourse, deleteCourse } from "../controllers/coursesController";
 
-export default function Courses() {
+export default function CoursesPage() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createCourseModalOpen, setCreateCourseModalOpen] = useState(false);
+  const [editCourseModalOpen, setEditCourseModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
 
-  const fetchCourses = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/courses`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch courses.");
+  useEffect(() => {
+    const loadCourses = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchCourses();
+        setCourses(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-      setCourses(data);
-    } catch (err: any) {
-      setError(err.message);
-      console.error("Error fetching courses:", err); // Log the error to the console
-    }
-  };
+    };
+    loadCourses();
+  }, []);
 
   const handleCreateCourse = async (course: any) => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/courses`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(course),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create course.");
-      }
-      await fetchCourses(); // Refresh courses after creation
+      await createCourse(course);
+      const updatedCourses = await fetchCourses();
+      setCourses(updatedCourses);
     } catch (err: any) {
       alert(err.message);
-      console.error("Error creating course:", err); // Log the error to the console
     }
   };
 
-  const deleteCourse = async (courseId: string) => {
-    if (!confirm("Are you sure you want to delete this course?")) return;
+  const handleEditCourse = async (courseId: string, updatedCourse: any) => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `http://localhost:5000/api/courses/${courseId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete course.");
-      }
-      setCourses((prev) => prev.filter((course: any) => course.id !== courseId));
+      await updateCourse(courseId, updatedCourse);
+      const updatedCourses = await fetchCourses();
+      setCourses(updatedCourses);
     } catch (err: any) {
       alert(err.message);
-      console.error("Error deleting course:", err); // Log the error to the console
     }
   };
 
-  useEffect(() => {
-    setLoading(true);
-    fetchCourses().finally(() => setLoading(false));
-  }, []);
+  const handleDeleteCourse = async (courseId: string) => {
+    if (confirm("Are you sure you want to delete this course?")) {
+      try {
+        await deleteCourse(courseId);
+        setCourses((prev) => prev.filter((course: any) => course.id !== courseId));
+      } catch (err: any) {
+        alert(err.message);
+      }
+    }
+  };
 
   return (
     <div>
@@ -118,13 +97,16 @@ export default function Courses() {
                   <td className="py-3 px-4 border-b">{course.location}</td>
                   <td className="py-3 px-4 border-b flex space-x-2">
                     <button
-                      onClick={() => console.log(`Edit course ${course.id}`)}
+                      onClick={() => {
+                        setSelectedCourse(course);
+                        setEditCourseModalOpen(true);
+                      }}
                       className="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-yellow-600"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => deleteCourse(course.id)}
+                      onClick={() => handleDeleteCourse(course.id)}
                       className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600"
                     >
                       Delete
@@ -137,12 +119,20 @@ export default function Courses() {
         )}
       </main>
 
-      {/* Create Course Modal */}
       <CreateCourseModal
         isOpen={createCourseModalOpen}
         onClose={() => setCreateCourseModalOpen(false)}
         onCreate={handleCreateCourse}
       />
+
+      {selectedCourse && (
+        <EditCourseModal
+          isOpen={editCourseModalOpen}
+          onClose={() => setEditCourseModalOpen(false)}
+          onEdit={handleEditCourse}
+          course={selectedCourse}
+        />
+      )}
     </div>
   );
 }

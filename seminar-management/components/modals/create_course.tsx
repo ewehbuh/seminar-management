@@ -4,7 +4,7 @@ import React, { useState } from "react";
 interface CreateCourseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (course: any) => void; // Replace `any` with your course type
+  onCreate: (course: any) => void; 
 }
 
 const CreateCourseModal: React.FC<CreateCourseModalProps> = ({ isOpen, onClose, onCreate }) => {

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { signupController } from "../controllers/authController";
 
 export default function Signup() {
   const [username, setUsername] = useState("");
@@ -10,7 +11,7 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter(); // Use Next.js router for navigation
+  const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,29 +24,14 @@ export default function Signup() {
       return;
     }
 
-    try {
-      const response = await fetch(`http://localhost:5000/api/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Signup failed. Please try again.");
-      }
-
-      // Handle successful signup (e.g., store token in localStorage)
-      localStorage.setItem("token", data.token);
+    const { success, message } = await signupController(username, email, password);
+    if (success) {
       alert("Signup successful!");
-      // Redirect user to the home page or login page
-      router.push("/login");
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      router.push("/login"); // Redirect to the login page
+    } else {
+      setError(message);
     }
+    setLoading(false);
   };
 
   return (
@@ -136,7 +122,8 @@ export default function Signup() {
         </form>
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
-            Already have an account? <Link href="/login" className="text-blue-600">Login</Link>
+            Already have an account?{" "}
+            <Link href="/login" className="text-blue-600">Login</Link>
           </p>
         </div>
       </div>

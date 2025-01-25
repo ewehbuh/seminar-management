@@ -2,42 +2,28 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { loginController } from "../controllers/authController";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter(); // Used for page redirection
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Login failed. Please try again.");
-      }
-
-      // Handle successful login (e.g., store token in localStorage)
-      localStorage.setItem("token", data.token);
+    const { success, message } = await loginController(email, password);
+    if (success) {
       alert("Login successful!");
-      // Redirect user to the home page or another page
-      router.push("/");
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      router.push("/"); // Redirect to the home page
+    } else {
+      setError(message);
     }
+    setLoading(false);
   };
 
   return (
