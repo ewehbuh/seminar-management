@@ -32,7 +32,11 @@ const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
-    res.json({ token: generateToken(user._id) });
+
+    res.json({
+      token: generateToken(user._id),
+      username: user.username 
+    });
   } catch (error) {
     res.status(500).json({ error: 'Login failed.' });
   }
