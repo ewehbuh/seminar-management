@@ -1,6 +1,7 @@
-const Course = require('../models/Course'); // Import Course model 
-const { isConflict, findBestTrainer } = require('../utils/conflictChecker');
-const { sendEmail } = require('../utils/emailService');
+const Course = require('../models/Course'); 
+ 
+const { isConflict } = require('../utils/conflictChecker');
+
 const mongoose = require('mongoose');
 
 // Get all courses
@@ -42,39 +43,7 @@ const createCourse = async (req, res) => {
   }
 };
 
-// Assign a trainer to a course
-const assignTrainer = async (req, res) => {
-  const { courseId, trainerId } = req.params;
 
-  try {
-    const course = await Course.findById(courseId);
-    const trainer = await Trainer.findById(trainerId);
-
-    if (!course || !trainer) {
-      return res.status(404).json({ error: 'Course or trainer not found.' });
-    }
-
-    if (trainer.assignedCourses.some((assignedCourse) => assignedCourse.date === course.date)) {
-      return res.status(400).json({
-        error: 'Trainer is already assigned to another course on this date.',
-      });
-    }
-
-    trainer.assignedCourses.push(course);
-    await trainer.save();
-
-    sendEmail(
-      trainer.email,
-      'New Course Assignment',
-      `You have been assigned to the course: ${course.name} on ${course.date}.`
-    );
-
-    res.json({ message: 'Trainer assigned successfully.' });
-  } catch (err) {
-    console.error("Error assigning trainer:", err); // Log error
-    res.status(500).json({ error: 'Failed to assign trainer.' });
-  }
-};
 
 // Update a course
 const updateCourse = async (req, res) => {
@@ -86,8 +55,8 @@ const updateCourse = async (req, res) => {
 
   try {
     const updatedCourse = await Course.findByIdAndUpdate(id, req.body, {
-      new: true, // Return the updated document
-      runValidators: true, // Ensure validation rules are applied
+      new: true, 
+      runValidators: true, 
     });
 
     if (!updatedCourse) {
@@ -133,4 +102,4 @@ const deleteCourse = async (req, res) => {
 
 
 
-module.exports = { getCourses, createCourse, assignTrainer, updateCourse, deleteCourse };
+module.exports = { getCourses, createCourse, updateCourse, deleteCourse };
