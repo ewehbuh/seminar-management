@@ -2,39 +2,57 @@ import Header from "../components/Header";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { getMetadata } from "../apis/trainerApi";
 
 export default function Home() {
-  const [stats] = useState({
-    totalCourses: 5,
-    totalTrainers: 12,
-    upcomingCourses: 3,
-    completedCourses: 2,
+  const [stats, setStats] = useState({
+    totalCourses: 0, 
+    totalTrainers: 0, 
+    upcomingCourses: 0, 
+    completedCourses:0, 
   });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true); // Loading state
 
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      router.push("/login"); // Redirect to login page if no token is found
+      router.push("/login");
     } else {
-      setIsAuthenticated(true); // User is authenticated
+      setIsAuthenticated(true);
+      fetchMetadata();
     }
   }, [router]);
 
-  const handleSignOut = () => {
-    localStorage.removeItem("token"); // Remove token from localStorage
-    setIsAuthenticated(false);
-    router.push("/login"); // Redirect to login page
+  const fetchMetadata = async () => {
+    try {
+      const metadata = await getMetadata();
+      setStats((prevStats) => ({
+        ...prevStats,
+        totalCourses: metadata.totalCourses || 0,
+        totalTrainers: metadata.totalTrainers || 0,
+      }));
+    } catch (error) {
+      console.error("Error fetching metadata:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (!isAuthenticated) return null; // Render nothing while checking authentication
+  if (!isAuthenticated || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-xl font-semibold">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <Header user="John Doe" onSignOut={handleSignOut} />
+      <Header />
       <main className="container mx-auto p-6">
         <h1 className="text-4xl font-bold mb-8">Dashboard</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
