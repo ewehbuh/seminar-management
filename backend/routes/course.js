@@ -8,7 +8,7 @@ router.get('/', protect, getCourses);
 router.post('/', protect, createCourse);
 router.patch('/:id', protect, updateCourse); 
 router.delete('/:id',protect, deleteCourse);
-router.post('/:courseId/assign/:trainerId', protect, assignTrainer);
+
 
 module.exports = router;
 
