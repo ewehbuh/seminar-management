@@ -1,11 +1,25 @@
 import Link from "next/link";
+import { useEffect, useState } from "react"; // Import useEffect and useState
+import { useRouter } from "next/router"; // Use useRouter hook for routing
 
-interface HeaderProps {
-  user: string;        // Define the type for user (e.g., string)
-  onSignOut: () => void; // Define the type for onSignOut (function)
-}
+const Header = () => {
+  const [user, setUser] = useState<string>("Guest"); 
+  const router = useRouter(); 
 
-const Header: React.FC<HeaderProps> = ({ user, onSignOut }) => {
+  useEffect(() => {
+    const storedUser = localStorage.getItem("username");
+    if (storedUser) {
+      setUser(storedUser); // Set user state if found
+    }
+  }, []); // Run only once on component mount
+
+  const handleSignOut = () => {
+    localStorage.removeItem("token"); // Remove token from localStorage
+    localStorage.removeItem("username"); // Optionally remove username
+    setUser("Guest"); // Reset user state
+    router.push("/login"); // Redirect to login page
+  };
+
   return (
     <header className="bg-gray-800 text-white p-4 flex justify-between items-center">
       <Link href="/" className="flex items-center">
@@ -14,8 +28,8 @@ const Header: React.FC<HeaderProps> = ({ user, onSignOut }) => {
       <div className="flex items-center space-x-4">
         <span className="text-sm">Welcome, {user}</span>
         <button
-          onClick={onSignOut}
-          className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600"
+          onClick={handleSignOut}
+          className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600 transition duration-200"
         >
           Sign Out
         </button>
