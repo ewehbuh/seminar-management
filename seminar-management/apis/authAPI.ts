@@ -27,6 +27,6 @@ export const loginAPI = async (email: string, password: string) => {
       throw new Error(data.error || "Signup failed. Please try again.");
     }
   
-    return data; // Assuming `data` includes `token`
+    return data; 
   };
   

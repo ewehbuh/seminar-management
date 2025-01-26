@@ -2,7 +2,7 @@
 
 import fetchWithToken from "../utils/fetchWithToken";
 
-const BASE_URL = "http://localhost:5000/api/courses";
+const BASE_URL = `http://localhost:5000/api/courses`;
 
 export const getCourses = async () => {
   const response = await fetchWithToken(BASE_URL, { method: "GET" });
