@@ -15,7 +15,7 @@ app.use(cors());  // This enables CORS for all routes
 // Connect to MongoDB
 connectDB();
 
-// Middleware
+// Middldb.trainers.deleteMany({ trainerEmail: null });
 app.use(express.json()); // Parse JSON bodies
 
 // Routes
