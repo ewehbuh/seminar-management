@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import CreateCourseModal from "../components/modals/create_course";
 import EditCourseModal from "../components/modals/edit_course";
 import { fetchCourses, createCourse, updateCourse, deleteCourse } from "../controllers/coursesController";
+import router from "next/router";
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState([]);
@@ -60,9 +61,23 @@ export default function CoursesPage() {
     }
   };
 
+  const handleAssignCourse = (course: any) => {
+    router.push({
+      pathname: "/assign",
+      query: {
+        courseId: course.id,
+        name: course.name,
+        subject: course.subject,
+        date: course.date,
+        location: course.location,
+      },
+    });
+  };
+  
+
   return (
     <div>
-      <Header user="John Doe" onSignOut={() => console.log("Signed out")} />
+      <Header/>
       <main className="container mx-auto p-6">
         <h1 className="text-4xl font-bold mb-8">Courses</h1>
         <button
@@ -111,6 +126,18 @@ export default function CoursesPage() {
                     >
                       Delete
                     </button>
+                    {course.trainerId ? (
+                      <button className="bg-gray-400 text-white px-4 py-2 rounded-lg shadow-md cursor-not-allowed" disabled>
+                        Assigned
+                      </button>
+                    ) : (
+                      <button
+                      onClick={() => handleAssignCourse(course)}
+                      className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600"
+                    >
+                      Assign
+                    </button>
+                    )}
                   </td>
                 </tr>
               ))}
