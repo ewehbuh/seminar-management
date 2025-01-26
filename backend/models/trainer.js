@@ -1,14 +1,17 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-// Define Trainer schema
 const trainerSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  trainingSubjects: { type: [String], required: true },
-  location: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  assignedCourses: { type: [mongoose.Schema.Types.ObjectId], ref: 'Course', default: [] },
+  trainerName: { type: String, required: true },
+  trainerSubjects: { type: [String], required: true },
+  trainerLocation: { type: String, required: true },
+  trainerEmail: { type: String, required: true, unique: true },
+  assignedCourses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Course',
+    },
+  ],
 });
 
-// Create and export the Trainer model
-const Trainer = mongoose.model('Trainer', trainerSchema);
-module.exports = Trainer;
+
+module.exports = mongoose.model("Trainer", trainerSchema);

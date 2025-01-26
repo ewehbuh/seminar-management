@@ -10,8 +10,9 @@ const courseSchema = new mongoose.Schema({
   notes: { type: String, default: '' },
   price: { type: Number, required: true },
   trainerPrice: { type: Number, required: true },
+  trainerId: { type: String, default: '' }, // Added trainerId with a default value of ''
 });
 
 // Create and export the Course model
-const Course = mongoose.model('Course', courseSchema);
-module.exports = Course;
+module.exports = mongoose.model('Course', courseSchema);
+ 
